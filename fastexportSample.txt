@@ -1,0 +1,7 @@
+.logtable PUA_TEST_DB.testlog;
+.logon 192.168.170.129/dbc,dbc;
+.begin export;
+.export outfile testdata.dat;   --Indic data by default
+sel * from PUA_TEST_DB.dbqlog_test_dump2
+.end export
+.logoff
