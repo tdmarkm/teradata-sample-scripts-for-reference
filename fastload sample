@@ -1,0 +1,30 @@
+#I hate cli
+.LOGON server/user,pass
+.set record text
+.RECORD 2;
+
+
+define queryid(DECIMAL(18,0)), sessionid (integer),logondatetime(varchar(19)), logonsource(char(128)) 
+file=testdata.dat;
+DROP TABLE P_IML_T_STD_0.dbqlog_test_dump2;
+DROP TABLE P_IML_T_STD_0.Error1;
+DROP TABLE P_IML_T_STD_0.Error2;
+CREATE MULTISET TABLE P_IML_T_STD_0.dbqlog_test_dump2 ,FALLBACK ,
+     NO BEFORE JOURNAL,
+     NO AFTER JOURNAL,
+     CHECKSUM = DEFAULT,
+     DEFAULT MERGEBLOCKRATIO
+     (
+      QueryID DECIMAL(18,0) FORMAT '--Z(17)9',
+      SessionID INTEGER FORMAT '--,---,---,--9',
+      LogonDateTime VARCHAR(19) CHARACTER SET LATIN NOT CASESPECIFIC,
+      LogonSource CHAR(128) CHARACTER SET LATIN NOT CASESPECIFIC)
+PRIMARY INDEX ( QueryID );  
+
+
+BEGIN LOADING P_IML_T_STD_0.dbqlog_test_dump2 ERRORFILES P_IML_T_STD_0.Error1,P_IML_T_STD_0.Error2
+   CHECKPOINT 10000;
+INSERT INTO P_IML_T_STD_0.dbqlog_test_dump2 (QueryID , SessionID , LogonDateTime , LogonSource ) VALUES 
+   (:queryid , :sessionid , :logondatetime , :logonsource );
+END LOADING;
+LOGOFF;
